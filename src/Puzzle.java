@@ -1,7 +1,8 @@
 public class Puzzle {
 	private char[][] grid;
 	private int size = 10;
-	private String errorMessage = "That word is too long!";
+	private char invalidSpace = 'X';
+	private char emptySpace = ' ';
 	
 	public Puzzle() {
 		grid = new char[size][size];
@@ -15,13 +16,13 @@ public class Puzzle {
 	}
 	
 	/**
-	 * Helps constructors for filling up grid with desired characters (empty spaces)
+	 * Helps constructors for filling up grid with desired characters (emptySpace spaces)
 	 * @param grid
 	 */
 	private void fill(char[][] grid) {
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
-				grid[i][j] = ' ';
+				grid[i][j] = emptySpace;
 			}
 		}
 	}
@@ -31,7 +32,7 @@ public class Puzzle {
 	 */
 	public String toString() {
 		String res = "";
-		
+
 		for (int i = 0; i < size; i++) {
 			// horizontal rows
 			for (int horiz = 0; horiz < size; horiz++) {
@@ -45,49 +46,83 @@ public class Puzzle {
 				res += "|" + grid[i][vert];
 			}
 			res += "|" + "\n";
-			
+
 		}
-		
+
 		// bottom row
 		for (int horiz = 0; horiz < size; horiz++) {
 			res += "--";
 			if (horiz == size - 1)
 				res += "-";
 		}
-		
+
 		return res;
 	}
-	
+
 	public void fillWordHoriz(String word, int row, int col) {
-		if (row < 0 || row > size - 1 || col < 0 || col > size - 1)
-			System.out.println("Invalid position in the puzzle!");
-		// TODO check for X's and make much more strict
-		if (word.length() + col > size) {
-			System.out.println(errorMessage);
-		}
+		if (!isValidMoveHoriz(word, row, col))
+			System.out.println("Invalid move! Try again.");
 		else {
-			char[] letters = word.toUpperCase().toCharArray();
+			char[] letters = word.toCharArray();
 			for (int i = 0; i < letters.length; i++) {
 				grid[row][col + i] = letters[i];
 			}
 		}
 	}
-	
+
 	public void fillWordVert(String word, int row, int col) {
-		if (row < 0 || row > size - 1 || col < 0 || col > size - 1)
-			System.out.println("Invalid position in the puzzle!");
-		if (word.length() + row > size) {
-			System.out.println(errorMessage);
-		}
+		if (!isValidMoveVert(word, row, col))
+			System.out.println("Invalid move! Try again.");
 		else {
-			char[] letters = word.toUpperCase().toCharArray();
+			char[] letters = word.toCharArray();
 			for (int i = 0; i < letters.length; i++) {
 				grid[row + i][col] = letters[i];
 			}
 		}
 	}
-	
-	private boolean validateMove(String word, Puzzle p, boolean isHorizontal) {
+
+	/**
+	 * Returns boolean to let you know if move is valid or not. Only works for HORIZONTAL words/moves.
+	 */
+	private boolean isValidMoveHoriz(String word, int row, int col) {
+		// check if word overruns puzzle
+		if (word.length() + col > size)
+			return false;
+		
+		char[] letters = word.toCharArray();
+		
+		for (int i = 0; i < word.length(); i++) {
+			char pos = grid[row][col + i];
+			// check if word reaches into invalid spaces (X'd out)
+			if (pos == invalidSpace)
+				return false;
+			// check if space is empty or a the same letter
+			else if (pos != emptySpace && pos != letters[i])
+				return false;
+		}
 		return true;
 	}
+	
+	/**
+	 * Returns boolean to let you know if move is valid or not. Only works for VERTICAL words/moves.
+	 */
+	private boolean isValidMoveVert(String word, int row, int col) {
+		// check if word overruns puzzle
+		if (word.length() + row > size)
+			return false;
+		
+		char[] letters = word.toCharArray();
+		
+		for (int i = 0; i < word.length(); i++) {
+			char pos = grid[row + i][col];
+			// check if word reaches into invalid spaces (X'd out)
+			if (pos == invalidSpace)
+				return false;
+			// check if space is empty or a the same letter
+			else if (pos != emptySpace && pos != letters[i])
+				return false;
+		}
+		return true;
+	}
+	
 }
